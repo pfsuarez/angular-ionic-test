@@ -5,6 +5,7 @@ import { Routes, RouterModule } from '@angular/router';
 
 import { IonicModule } from '@ionic/angular';
 
+import { RecipeItemComponent } from './recipe-item/recipe-item.component';
 import { RecipesPage } from './recipes.page';
 
 const routes: Routes = [
@@ -21,6 +22,6 @@ const routes: Routes = [
     IonicModule,
     RouterModule.forChild(routes)
   ],
-  declarations: [RecipesPage]
+  declarations: [RecipesPage, RecipeItemComponent]
 })
-export class RecipesPageModule {}
+export class RecipesPageModule { }
