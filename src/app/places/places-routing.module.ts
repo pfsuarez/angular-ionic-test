@@ -1,4 +1,3 @@
-import { DiscoverPage } from './discover/discover.page';
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 

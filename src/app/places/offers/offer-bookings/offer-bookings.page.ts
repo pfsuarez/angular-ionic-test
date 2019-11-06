@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { NavController } from '@ionic/angular';
 
 @Component({
   selector: 'app-offer-bookings',
@@ -7,9 +8,12 @@ import { Component, OnInit } from '@angular/core';
 })
 export class OfferBookingsPage implements OnInit {
 
-  constructor() { }
+  constructor(private navCtrl: NavController) { }
 
   ngOnInit() {
   }
 
+  onBack() {
+    this.navCtrl.navigateBack('/places/tabs/offers');
+  }
 }
