@@ -9,6 +9,10 @@
 </ion-header>
 
 <ion-content class="ion-padding">
+  <ion-segment (ionChange)="onFilterUpdate($event)">
+    <ion-segment-button value="all" checked>All Places</ion-segment-button>
+    <ion-segment-button value="bookable">Bookable Places</ion-segment-button>
+  </ion-segment>
   <ion-grid>
     <ion-row>
       <ion-col size="12" size-sm="8" offset-sm="2" class="ion-text-center">
@@ -32,7 +36,7 @@
     </ion-row>
     <ion-row>
       <ion-col size="12" size-sm="8" offset-sm="2" class="ion-text-center">
-        <ion-virtual-scroll [items]="listedLoadedPlaces" approxItemHight="70px">
+        <ion-virtual-scroll [items]="listedLoadedPlaces">
           <ion-item *virtualItem="let place" [routerLink]="['/places/tabs/discover', place.id]" detail>
             <ion-thumbnail slot="start">
               <ion-img [src]="place.imageUrl"></ion-img>
