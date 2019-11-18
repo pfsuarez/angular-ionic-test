@@ -21,15 +21,7 @@
             <ion-label>Current Offers</ion-label>
           </ion-list-header>
           <ion-item-sliding *ngFor="let offer of offers" #slidingItem>
-            <ion-item detail [routerLink]="['/places/tabs/offers', offer.id]">
-              <ion-thumbnail slot="start">
-                <ion-img [src]="offer.imageUrl"></ion-img>
-              </ion-thumbnail>
-              <ion-label>
-                <h2>{{offer.title}}</h2>
-                <p>{{offer.description}}</p>
-              </ion-label>
-            </ion-item>
+            <app-offer-item [offer]="offer"></app-offer-item>
             <ion-item-options side="end">
               <!--RouterLink does not close the sliding
               [routerLink]="['/places/tabs/offers/edit', offer.id]" -->
