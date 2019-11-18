@@ -12,6 +12,7 @@ import { NgForm } from '@angular/forms';
 })
 export class AuthPage implements OnInit {
   isLoading = false;
+  isLoginMode = true;
 
   constructor(
     private router: Router,
@@ -37,6 +38,10 @@ export class AuthPage implements OnInit {
         this.router.navigateByUrl('/places/tabs/discover');
       }, 100);
     });
+  }
+
+  onSwitchAuthMode() {
+    this.isLoginMode = !this.isLoginMode;
   }
 
   onSubmit(form: NgForm) {
