@@ -36,7 +36,7 @@ export class AuthPage implements OnInit {
         this.isLoading = false;
         loadingEL.dismiss();
         this.router.navigateByUrl('/places/tabs/discover');
-      }, 100);
+      }, 300);
     });
   }
 
@@ -45,6 +45,19 @@ export class AuthPage implements OnInit {
   }
 
   onSubmit(form: NgForm) {
-    console.log('', form);
+    if (!form.valid) {
+      return;
+    }
+
+    const email = form.value.email;
+    const password = form.value.password;
+    console.log(email, password);
+
+    if (this.isLoginMode) {
+      // send a request to loging servers
+      this.onLogin();
+    } else {
+      // send a request to signup servers
+    }
   }
 }
