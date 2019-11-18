@@ -15,9 +15,16 @@
               <ion-label position="floating">E-Mail</ion-label>
               <ion-input type="email" ngModel name="email" required email #emailCtrl="ngModel"></ion-input>
             </ion-item>
+            <ion-item *ngIf="!emailCtrl.valid && emailCtrl.touched" lines="none">
+              <ion-text>Should be a valid email address.</ion-text>
+            </ion-item>
             <ion-item>
               <ion-label position="floating">Password</ion-label>
-              <ion-input type="password" ngModel name="password" required minlength="6"></ion-input>
+              <ion-input type="password" ngModel name="password" required minlength="6" #passwordCtrl="ngModel">
+              </ion-input>
+            </ion-item>
+            <ion-item line="none" *ngIf="!passwordCtrl.valid && passwordCtrl.valid">
+              <ion-text>Should at least be 6 characters long.</ion-text>
             </ion-item>
           </ion-list>
         </ion-col>
@@ -26,7 +33,8 @@
         <ion-col size-sm="6" offset-sm="3">
           <!-- expand can be 'full' -->
           <ion-button type="button" color="primary" fill="clear" expand="block">Switch to Login</ion-button>
-          <ion-button type="submit" color="primary" (click)="onLogin()" expand="block">Login</ion-button>
+          <ion-button type="submit" color="primary" (click)="onLogin()" expand="block" [disabled]="!f.valid">Login
+          </ion-button>
         </ion-col>
       </ion-row>
     </ion-grid>
