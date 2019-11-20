@@ -69,7 +69,7 @@ export class PlaceDetailPage implements OnInit {
       component: CreateBookingComponent,
       componentProps: {
         selectedPlace: this.place,
-        mode
+        selectedMode: mode
       }
     })
       .then(modalEl => {
