@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { take, map } from 'rxjs/operators';
+import { take, map, tap, delay } from 'rxjs/operators';
 
 import { Place } from './place.model';
 import { AuthService } from './../auth/auth.service';
@@ -72,10 +72,13 @@ export class PlacesService {
     const imageUrl = 'http://www.larotativadigital.com.ar/wp-content/uploads/2017/12/Bariloche_Puente-Lagos-verano.jpg';
     const newPlace = new Place(id, title, description, imageUrl, price, dateFrom, dateTo, this.authService.UserId);
 
-    this.places
-      .pipe(take(1))
-      .subscribe((places) => {
-        this.places.next(places.concat(newPlace));
-      });
+    return this.places
+      .pipe(
+        take(1),
+        delay(2000), // Simulate delay on operation
+        tap(places => {
+          this.places.next(places.concat(newPlace));
+        })
+      );
   }
 }
