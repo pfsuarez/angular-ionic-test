@@ -1,4 +1,6 @@
 import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
+import { take, map } from 'rxjs/operators';
 
 import { Place } from './place.model';
 import { AuthService } from './../auth/auth.service';
@@ -7,7 +9,7 @@ import { AuthService } from './../auth/auth.service';
   providedIn: 'root'
 })
 export class PlacesService {
-  private places: Place[] = [
+  private places = new BehaviorSubject<Place[]>([
     new Place(
       'p1',
       'Manhattan Mansion',
@@ -47,25 +49,20 @@ export class PlacesService {
       new Date('2019-11-01'),
       new Date('2019-11-15'),
       'abc'
-    ),
-    new Place(
-      'p4',
-      'The Foggy Palace 4',
-      'Not your average city trip!',
-      'https://upload.wikimedia.org/wikipedia/commons/0/01/San_Francisco_with_two_bridges_and_the_fog.jpg',
-      99.99,
-      new Date('2019-11-01'),
-      new Date('2019-11-30'),
-      'abc'
-    )
-  ];
+    )]
+  );
 
   getPlaces() {
-    return [...this.places];
+    return this.places.asObservable();
   }
 
   getPlace(id: string) {
-    return { ...this.places.find(p => p.id === id) };
+    return this.getPlaces()
+      .pipe(
+        take(1),
+        map(places => {
+          return { ...places.find(p => p.id === id) };
+        }));
   }
 
   constructor(private authService: AuthService) { }
@@ -75,6 +72,10 @@ export class PlacesService {
     const imageUrl = 'http://www.larotativadigital.com.ar/wp-content/uploads/2017/12/Bariloche_Puente-Lagos-verano.jpg';
     const newPlace = new Place(id, title, description, imageUrl, price, dateFrom, dateTo, this.authService.UserId);
 
-    this.places.push(newPlace);
+    this.places
+      .pipe(take(1))
+      .subscribe((places) => {
+        this.places.next(places.concat(newPlace));
+      });
   }
 }

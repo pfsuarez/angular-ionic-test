@@ -1,5 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
+
 import { IonItemSliding } from '@ionic/angular';
 
 import { Place } from '../place.model';
@@ -10,8 +12,9 @@ import { PlacesService } from './../places.service';
   templateUrl: './offers.page.html',
   styleUrls: ['./offers.page.scss'],
 })
-export class OffersPage implements OnInit {
+export class OffersPage implements OnInit, OnDestroy {
   offers: Place[];
+  private placesSub: Subscription;
 
   constructor(
     private placesService: PlacesService,
@@ -19,7 +22,15 @@ export class OffersPage implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.offers = this.placesService.getPlaces();
+    this.placesSub = this.placesService.getPlaces().subscribe(places => {
+      this.offers = places;
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.placesSub) {
+      this.placesSub.unsubscribe();
+    }
   }
 
   onEdit(offerId: string, slidingItem: IonItemSliding) {
