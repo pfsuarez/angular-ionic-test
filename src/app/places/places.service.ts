@@ -41,8 +41,8 @@ export class PlacesService {
       'abc'
     ),
     new Place(
-      'p3',
-      'The Foggy Palace',
+      'p4',
+      'The Palace',
       'Not your average city trip!',
       'https://upload.wikimedia.org/wikipedia/commons/0/01/San_Francisco_with_two_bridges_and_the_fog.jpg',
       99.99,
@@ -78,6 +78,27 @@ export class PlacesService {
         delay(2000), // Simulate delay on operation
         tap(places => {
           this.places.next(places.concat(newPlace));
+        })
+      );
+  }
+
+  updatePlace(id: string, title: string, description: string) {
+    return this.places
+      .pipe(
+        take(1),
+        delay(1000),
+        tap(places => {
+          const updatedPlaces = [...places];
+          const index = places.findIndex(x => x.id === id);
+          const place = updatedPlaces[index]; // new Place();
+          if (place) {
+            place.title = title;
+            place.description = description;
+
+            updatedPlaces[index] = place;
+
+            this.places.next(updatedPlaces);
+          }
         })
       );
   }
