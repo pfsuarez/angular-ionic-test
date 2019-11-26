@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject } from 'rxjs';
-import { take, map, tap, delay } from 'rxjs/operators';
+import { take, map, tap, delay, switchMap } from 'rxjs/operators';
 
 import { Place } from './place.model';
 import { AuthService } from './../auth/auth.service';
@@ -9,6 +10,7 @@ import { AuthService } from './../auth/auth.service';
   providedIn: 'root'
 })
 export class PlacesService {
+  private firebaseUrl = '';
   private places = new BehaviorSubject<Place[]>([
     new Place(
       'p1',
@@ -65,18 +67,26 @@ export class PlacesService {
         }));
   }
 
-  constructor(private authService: AuthService) { }
+  constructor(
+    private authService: AuthService,
+    private http: HttpClient
+  ) { }
 
   addPlace(title: string, description: string, price: number, dateFrom: Date, dateTo: Date) {
+    let generatedId: string;
     const id = Math.random().toString();
     const imageUrl = 'http://www.larotativadigital.com.ar/wp-content/uploads/2017/12/Bariloche_Puente-Lagos-verano.jpg';
     const newPlace = new Place(id, title, description, imageUrl, price, dateFrom, dateTo, this.authService.UserId);
 
-    return this.places
+    return this.http.post<{ name: string }>(this.firebaseUrl, { ...newPlace, id: null })
       .pipe(
+        switchMap(resData => {
+          generatedId = resData.name;
+          return this.getPlaces();
+        }),
         take(1),
-        delay(2000), // Simulate delay on operation
         tap(places => {
+          newPlace.id = generatedId;
           this.places.next(places.concat(newPlace));
         })
       );
