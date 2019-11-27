@@ -42,7 +42,7 @@ export class PlacesService {
   ) { }
 
   fetchPlaces() {
-    return this.http.get<{ [key: string]: PlaceData }>(environment.firebaseOfferedPlacesUrl)
+    return this.http.get<{ [key: string]: PlaceData }>(`${environment.firebaseOfferedPlacesUrl}.json`)
       .pipe(
         map(resData => {
           const places: Place[] = [];
@@ -75,7 +75,7 @@ export class PlacesService {
     const imageUrl = 'http://www.larotativadigital.com.ar/wp-content/uploads/2017/12/Bariloche_Puente-Lagos-verano.jpg';
     const newPlace = new Place(id, title, description, imageUrl, price, dateFrom, dateTo, this.authService.UserId);
 
-    return this.http.post<{ name: string }>(environment.firebaseOfferedPlacesUrl, { ...newPlace, id: null })
+    return this.http.post<{ name: string }>(`${environment.firebaseOfferedPlacesUrl}.json`, { ...newPlace, id: null })
       .pipe(
         switchMap(resData => {
           generatedId = resData.name;
@@ -90,22 +90,34 @@ export class PlacesService {
   }
 
   updatePlace(id: string, title: string, description: string) {
+    let updatedPlaces: Place[];
+    return this.getPlaces()
+      .pipe(
+        take(1),
+        switchMap(places => {
+          updatedPlaces = [...places];
+          const index = places.findIndex(x => x.id === id);
+          const place = updatedPlaces[index]; // new Place();
+
+          place.title = title;
+          place.description = description;
+
+          updatedPlaces[index] = place;
+
+          return this.http.put(`${environment.firebaseOfferedPlacesUrl}/${id}.json`, { ...place, id: null });
+        }),
+        tap(() => {
+          this.places.next(updatedPlaces);
+        })
+      );
+
+
     return this.places
       .pipe(
         take(1),
         delay(1000),
         tap(places => {
-          const updatedPlaces = [...places];
-          const index = places.findIndex(x => x.id === id);
-          const place = updatedPlaces[index]; // new Place();
-          if (place) {
-            place.title = title;
-            place.description = description;
 
-            updatedPlaces[index] = place;
-
-            this.places.next(updatedPlaces);
-          }
         })
       );
   }
