@@ -16,6 +16,8 @@ import { PlacesService } from './../../places.service';
 export class EditOfferPage implements OnInit, OnDestroy {
   form: FormGroup;
   place: Place;
+  placeId: string;
+  isLoading = true;
   private placeSub: Subscription;
 
   constructor(
@@ -26,11 +28,15 @@ export class EditOfferPage implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit() {
+
     this.route.paramMap.subscribe(paramMap => {
       if (!paramMap.has('placeId')) {
         this.navCtrl.navigateBack('/places/tabs/offers');
         return;
       }
+
+      this.isLoading = true;
+      this.placeId = paramMap.get('placeId');
 
       this.placeSub = this.placesService
         .getPlace(paramMap.get('placeId'))
@@ -47,6 +53,8 @@ export class EditOfferPage implements OnInit, OnDestroy {
               validators: [Validators.required, Validators.maxLength(180)]
             })
           });
+
+          this.isLoading = false;
         });
     });
   }

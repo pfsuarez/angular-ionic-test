@@ -27,15 +27,6 @@ export class PlacesService {
     return this.places.asObservable();
   }
 
-  getPlace(id: string) {
-    return this.getPlaces()
-      .pipe(
-        take(1),
-        map(places => {
-          return { ...places.find(p => p.id === id) };
-        }));
-  }
-
   constructor(
     private authService: AuthService,
     private http: HttpClient
@@ -62,9 +53,25 @@ export class PlacesService {
           }
           return places;
         }),
-        delay(500),
         tap(places => {
           this.places.next(places);
+        })
+      );
+  }
+
+  getPlace(id: string) {
+    return this.http.get<PlaceData>(`${environment.firebaseOfferedPlacesUrl}/${id}.json`)
+      .pipe(
+        map(placeData => {
+          return new Place(
+            id,
+            placeData.title,
+            placeData.description,
+            placeData.imageUrl,
+            placeData.price,
+            new Date(placeData.availableFrom),
+            new Date(placeData.availableTo),
+            placeData.userId);
         })
       );
   }
