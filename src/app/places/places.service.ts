@@ -110,15 +110,5 @@ export class PlacesService {
           this.places.next(updatedPlaces);
         })
       );
-
-
-    return this.places
-      .pipe(
-        take(1),
-        delay(1000),
-        tap(places => {
-
-        })
-      );
   }
 }
