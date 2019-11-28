@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { NavController, ModalController, ActionSheetController, LoadingController } from '@ionic/angular';
+import { ActivatedRoute, Router } from '@angular/router';
+import { NavController, ModalController, ActionSheetController, LoadingController, AlertController } from '@ionic/angular';
 import { Subscription } from 'rxjs';
 
 import { Place } from '../../place.model';
@@ -16,18 +16,21 @@ import { AuthService } from 'src/app/auth/auth.service';
 })
 export class PlaceDetailPage implements OnInit, OnDestroy {
   place: Place;
+  isLoading = false;
   isBookable = false;
   private placeSub: Subscription;
 
   constructor(
     private placesService: PlacesService,
+    private authService: AuthService,
     private bookingService: BookingService,
     private route: ActivatedRoute,
+    private router: Router,
     private navCtrl: NavController,
     private modalCtrl: ModalController,
     private actionSheetCtrl: ActionSheetController,
     private loadingCtrl: LoadingController,
-    private authService: AuthService
+    private alertCtrl: AlertController
   ) { }
 
   ngOnInit() {
@@ -37,11 +40,29 @@ export class PlaceDetailPage implements OnInit, OnDestroy {
         return;
       }
 
+      this.isLoading = true;
+
       this.placeSub = this.placesService
         .getPlace(paramMap.get('placeId'))
         .subscribe(place => {
           this.place = place;
           this.isBookable = place.userId !== this.authService.UserId;
+          this.isLoading = false;
+        }, error => {
+          this.alertCtrl.create({
+            header: 'An error occurred',
+            message: 'Could not load Place. Please try again.',
+            buttons: [
+              {
+                text: 'Ok',
+                handler: () => {
+                  this.router.navigateByUrl('/places/tabs/discover');
+                }
+              }
+            ]
+          }).then(alertEl => {
+            alertEl.present();
+          });
         });
     });
   }
