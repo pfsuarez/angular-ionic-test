@@ -4,6 +4,7 @@ import { BehaviorSubject, of } from 'rxjs';
 import { take, map, tap, delay, switchMap } from 'rxjs/operators';
 
 import { Place } from './place.model';
+import { PlaceLocation } from './location.model';
 import { AuthService } from './../auth/auth.service';
 import { environment } from 'src/environments/environment';
 
@@ -15,6 +16,7 @@ interface PlaceData {
   price: number;
   title: string;
   userId: string;
+  location: PlaceLocation;
 }
 
 @Injectable({
@@ -48,7 +50,8 @@ export class PlacesService {
                 data.price,
                 new Date(data.availableFrom),
                 new Date(data.availableTo),
-                data.userId));
+                data.userId,
+                data.location));
             }
           }
           return places;
@@ -71,16 +74,17 @@ export class PlacesService {
             placeData.price,
             new Date(placeData.availableFrom),
             new Date(placeData.availableTo),
-            placeData.userId);
+            placeData.userId,
+            placeData.location);
         })
       );
   }
 
-  addPlace(title: string, description: string, price: number, dateFrom: Date, dateTo: Date) {
+  addPlace(title: string, description: string, price: number, dateFrom: Date, dateTo: Date, location: PlaceLocation) {
     let generatedId: string;
     const id = Math.random().toString();
     const imageUrl = 'http://www.larotativadigital.com.ar/wp-content/uploads/2017/12/Bariloche_Puente-Lagos-verano.jpg';
-    const newPlace = new Place(id, title, description, imageUrl, price, dateFrom, dateTo, this.authService.UserId);
+    const newPlace = new Place(id, title, description, imageUrl, price, dateFrom, dateTo, this.authService.UserId, location);
 
     return this.http.post<{ name: string }>(`${environment.firebaseOfferedPlacesUrl}.json`, { ...newPlace, id: null })
       .pipe(

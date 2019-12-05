@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
@@ -9,12 +9,15 @@ import { environment } from 'src/environments/environment';
 import { MapModalComponent } from './../../map-modal/map-modal.component';
 import { PlaceLocation } from './../../../places/location.model';
 
+
 @Component({
   selector: 'app-location-picker',
   templateUrl: './location-picker.component.html',
   styleUrls: ['./location-picker.component.scss'],
 })
 export class LocationPickerComponent implements OnInit {
+  @Output() locationPick = new EventEmitter<PlaceLocation>();
+
   selectedLocationImage: string;
   isLoading = false;
 
@@ -56,6 +59,7 @@ export class LocationPickerComponent implements OnInit {
             pickedLocation.staticMapImageUrl = staticMapImage;
             this.selectedLocationImage = staticMapImage;
             this.isLoading = false;
+            this.locationPick.emit(pickedLocation);
           });
       });
       modalEl.present();
