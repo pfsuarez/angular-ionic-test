@@ -73,8 +73,6 @@ export class NewOfferPage implements OnInit {
           this.router.navigateByUrl('/places/tabs/offers');
         });
     });
-
-
   }
 
   onLocationPicked(location: PlaceLocation) {
