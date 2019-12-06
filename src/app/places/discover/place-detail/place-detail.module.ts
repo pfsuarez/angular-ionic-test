@@ -5,6 +5,8 @@ import { Routes, RouterModule } from '@angular/router';
 
 import { IonicModule } from '@ionic/angular';
 
+import { SharedModule } from './../../../shared/shared.module';
+
 import { PlaceDetailPage } from './place-detail.page';
 import { CreateBookingComponent } from './../../../bookings/create-booking/create-booking.component';
 
@@ -20,7 +22,8 @@ const routes: Routes = [
     CommonModule,
     FormsModule,
     IonicModule,
-    RouterModule.forChild(routes)
+    RouterModule.forChild(routes),
+    SharedModule
   ],
   declarations: [PlaceDetailPage, CreateBookingComponent],
   entryComponents: [CreateBookingComponent]

@@ -52,7 +52,7 @@ export class LocationPickerComponent implements OnInit {
             switchMap(address => {
               pickedLocation.address = address;
 
-              return of(this.getMapImage(pickedLocation.lat, pickedLocation.lng, 14));
+              return of(this.getMapImage(pickedLocation.lat, pickedLocation.lng, 16));
             })
           )
           .subscribe(staticMapImage => {
