@@ -3,11 +3,12 @@ import { HttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
-import { ModalController } from '@ionic/angular';
+import { ModalController, ActionSheetController, AlertController } from '@ionic/angular';
+import { Plugins, Capacitor } from '@capacitor/core';
 
 import { environment } from 'src/environments/environment';
 import { MapModalComponent } from './../../map-modal/map-modal.component';
-import { PlaceLocation } from './../../../places/location.model';
+import { PlaceLocation, Coordinates } from './../../../places/location.model';
 
 
 @Component({
@@ -22,13 +23,77 @@ export class LocationPickerComponent implements OnInit {
   isLoading = false;
 
   constructor(
+    private http: HttpClient,
     private modalCtrl: ModalController,
-    private http: HttpClient
+    private alertCtrl: AlertController,
+    private actionSheetCtrl: ActionSheetController
   ) { }
 
   ngOnInit() { }
 
   onPickLocation() {
+    this.actionSheetCtrl.create({
+      header: 'Please Choose',
+      buttons: [
+        {
+          text: 'Auto-Locate',
+          handler: () => {
+            this.locateUser();
+          }
+        },
+        {
+          text: 'Pick on Map',
+          handler: () => {
+            this.openMap();
+          }
+        },
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        },
+      ]
+    })
+      .then(actionSheetEl => {
+        actionSheetEl.present();
+      });
+  }
+
+  private locateUser() {
+    if (!Capacitor.isPluginAvailable('Geolocation')) {
+      this.showErrorAlert();
+      return;
+    }
+
+    Plugins.Geolocation.getCurrentPosition()
+      .then(geoPosition => {
+        console.log('', geoPosition);
+        const coordinate: Coordinates = {
+          lat: geoPosition.coords.latitude,
+          lng: geoPosition.coords.longitude
+        };
+
+        /*
+          coords: Coordinates
+            accuracy: 29
+            altitude: null
+            altitudeAccuracy: null
+            heading: null
+            latitude: 43.9121021
+            longitude: 72.332892
+            speed: null
+        */
+      })
+      .catch(err => this.showErrorAlert());
+  }
+
+  private showErrorAlert() {
+    this.alertCtrl.create({
+      header: 'Could not fetch location',
+      message: 'Please use the map to pick a location!'
+    }).then(alertEl => alertEl.present());
+  }
+
+  private openMap() {
     this.modalCtrl.create({
       component: MapModalComponent
     }).then(modalEl => {
