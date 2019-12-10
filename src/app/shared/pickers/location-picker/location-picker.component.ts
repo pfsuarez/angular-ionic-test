@@ -64,14 +64,18 @@ export class LocationPickerComponent implements OnInit {
       return;
     }
 
+    this.isLoading = true;
+
     Plugins.Geolocation.getCurrentPosition()
       .then(geoPosition => {
         console.log('', geoPosition);
-        const coordinate: Coordinates = {
+        const coordinates: Coordinates = {
           lat: geoPosition.coords.latitude,
           lng: geoPosition.coords.longitude
         };
 
+        this.createPlace(coordinates);
+        this.isLoading = false;
         /*
           coords: Coordinates
             accuracy: 29
@@ -83,14 +87,44 @@ export class LocationPickerComponent implements OnInit {
             speed: null
         */
       })
-      .catch(err => this.showErrorAlert());
+      .catch(err => {
+        this.showErrorAlert();
+        this.isLoading = false;
+      });
   }
 
   private showErrorAlert() {
     this.alertCtrl.create({
       header: 'Could not fetch location',
-      message: 'Please use the map to pick a location!'
+      message: 'Please use the map to pick a location!',
+      buttons: ['Ok']
     }).then(alertEl => alertEl.present());
+  }
+
+  private createPlace(coordinates: Coordinates) {
+    this.isLoading = true;
+
+    const pickedLocation: PlaceLocation = {
+      lat: coordinates.lat,
+      lng: coordinates.lng,
+      address: null,
+      staticMapImageUrl: null
+    };
+
+    this.getAddress(coordinates.lat, coordinates.lng)
+      .pipe(
+        switchMap(address => {
+          pickedLocation.address = address;
+
+          return of(this.getMapImage(pickedLocation.lat, pickedLocation.lng, 16));
+        })
+      )
+      .subscribe(staticMapImage => {
+        pickedLocation.staticMapImageUrl = staticMapImage;
+        this.selectedLocationImage = staticMapImage;
+        this.isLoading = false;
+        this.locationPick.emit(pickedLocation);
+      });
   }
 
   private openMap() {
@@ -103,29 +137,13 @@ export class LocationPickerComponent implements OnInit {
           return;
         }
 
-        this.isLoading = true;
-
-        const pickedLocation: PlaceLocation = {
+        const coordinates: Coordinates = {
           lat: modalData.data.lat,
-          lng: modalData.data.lng,
-          address: null,
-          staticMapImageUrl: null
+          lng: modalData.data.lng
         };
 
-        this.getAddress(modalData.data.lat, modalData.data.lng)
-          .pipe(
-            switchMap(address => {
-              pickedLocation.address = address;
+        this.createPlace(coordinates);
 
-              return of(this.getMapImage(pickedLocation.lat, pickedLocation.lng, 16));
-            })
-          )
-          .subscribe(staticMapImage => {
-            pickedLocation.staticMapImageUrl = staticMapImage;
-            this.selectedLocationImage = staticMapImage;
-            this.isLoading = false;
-            this.locationPick.emit(pickedLocation);
-          });
       });
       modalEl.present();
     });
