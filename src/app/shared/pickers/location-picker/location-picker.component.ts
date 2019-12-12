@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, Input } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
@@ -18,7 +18,7 @@ import { PlaceLocation, Coordinates } from './../../../places/location.model';
 })
 export class LocationPickerComponent implements OnInit {
   @Output() locationPick = new EventEmitter<PlaceLocation>();
-
+  @Input() showPreview = false;
   selectedLocationImage: string;
   isLoading = false;
 
