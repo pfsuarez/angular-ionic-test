@@ -1,3 +1,4 @@
+import { switchMap } from 'rxjs/operators';
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -87,8 +88,14 @@ export class NewOfferPage implements OnInit {
       const dateFrom = new Date(this.form.value.dateFrom);
       const dateTo = new Date(this.form.value.dateTo);
       const location = this.form.value.location;
+      const image = this.form.value.image;
 
-      this.placesService.addPlace(title, description, price, dateFrom, dateTo, location)
+      this.placesService.uploadImage(image)
+        .pipe(
+          switchMap(uploadRes => {
+            return this.placesService.addPlace(title, description, price, uploadRes.imageUrl, dateFrom, dateTo, location);
+          })
+        )
         .subscribe(() => {
           this.form.reset();
           loadingEl.dismiss();

@@ -80,10 +80,25 @@ export class PlacesService {
       );
   }
 
-  addPlace(title: string, description: string, price: number, dateFrom: Date, dateTo: Date, location: PlaceLocation) {
+  uploadImage(image: File) {
+    const uploadData = new FormData();
+    uploadData.append('image', image);
+
+    return this.http.post<{ imageUrl: string, imagePath: string }>(environment.firebaseUploadImageUrl, uploadData);
+  }
+
+  addPlace(
+    title: string,
+    description: string,
+    price: number,
+    imageUrl: string,
+    dateFrom: Date,
+    dateTo: Date,
+    location: PlaceLocation
+  ) {
     let generatedId: string;
     const id = Math.random().toString();
-    const imageUrl = 'http://www.larotativadigital.com.ar/wp-content/uploads/2017/12/Bariloche_Puente-Lagos-verano.jpg';
+
     const newPlace = new Place(id, title, description, imageUrl, price, dateFrom, dateTo, this.authService.UserId, location);
 
     return this.http.post<{ name: string }>(`${environment.firebaseOfferedPlacesUrl}.json`, { ...newPlace, id: null })
