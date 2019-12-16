@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Observable } from 'rxjs';
 
 import { LoadingController, AlertController } from '@ionic/angular';
 
-import { AuthService } from './auth.service';
+import { AuthService, AuthResponseData } from './auth.service';
 
 @Component({
   selector: 'app-auth',
@@ -27,7 +28,7 @@ export class AuthPage implements OnInit {
 
   authenticate(email: string, password: string) {
     this.isLoading = true;
-    this.authService.login();
+    // this.authService.login();
 
     this.loadingCtrl.create({
       keyboardClose: true,
@@ -35,15 +36,15 @@ export class AuthPage implements OnInit {
     }).then(loadingEL => {
       loadingEL.present();
 
-      let service;
+      let authObs: Observable<AuthResponseData>;
 
       if (this.isLoginMode) {
-
+        authObs = this.authService.login(email, password);
       } else {
-        service = this.authService.signup(email, password);
+        authObs = this.authService.signup(email, password);
       }
 
-      service.subscribe(resData => {
+      authObs.subscribe(resData => {
         console.log('', resData);
         this.isLoading = false;
         loadingEL.dismiss();
@@ -57,6 +58,12 @@ export class AuthPage implements OnInit {
         switch (code) {
           case 'EMAIL_EXISTS':
             message = 'This email exists already!';
+            break;
+          case 'INVALID_PASSWORD':
+            message = 'This password is not correct.';
+            break;
+          case 'EMAIL_NOT_FOUND':
+            message = 'E-Mail address could not be found';
             break;
         }
 
