@@ -1,6 +1,10 @@
-import { environment } from 'src/environments/environment';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject } from 'rxjs';
+import { map, tap } from 'rxjs/operators';
+
+import { environment } from 'src/environments/environment';
+import { User } from './user.model';
 
 export interface AuthResponseData {
   idToken: string;
@@ -15,15 +19,32 @@ export interface AuthResponseData {
   providedIn: 'root'
 })
 export class AuthService {
-  private isUserAuthenticated = false;
-  private pUserId = null;
+  private user = new BehaviorSubject<User>(null);
 
   get userIsAuthenticated() {
-    return this.isUserAuthenticated;
+    return this.user.asObservable()
+      .pipe(
+        map(user => {
+          if (user) {
+            return !!user.token;
+          } else {
+            return false;
+          }
+        })
+      );
   }
 
   get UserId() {
-    return this.pUserId;
+    return this.user.asObservable()
+      .pipe(
+        map(user => {
+          if (user) {
+            return user.id;
+          } else {
+            return null;
+          }
+        })
+      );
   }
 
   constructor(
@@ -37,7 +58,10 @@ export class AuthService {
         email,
         password,
         returnSecureToken: true
-      });
+      })
+      .pipe(
+        tap(userData => this.setUserData(userData))
+      );
   }
 
   login(email: string, password: string) {
@@ -49,9 +73,22 @@ export class AuthService {
         returnSecureToken: true
       }
     )
+      .pipe(
+        tap(userData => this.setUserData(userData))
+      );
   }
 
   logout() {
-    this.isUserAuthenticated = false;
+    this.user.next(null);
+  }
+
+  private setUserData(userData: AuthResponseData) {
+    const expirationTime = new Date(new Date().getTime() + (+userData.expiresIn * 1000));
+    this.user.next(new User(
+      userData.localId,
+      userData.email,
+      userData.idToken,
+      expirationTime
+    ));
   }
 }

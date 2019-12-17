@@ -1,3 +1,4 @@
+import { take } from 'rxjs/operators';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
 
@@ -53,12 +54,18 @@ export class DiscoverPage implements OnInit, OnDestroy {
 
   onFilterUpdate(event: CustomEvent<SegmentChangeEventDetail>) {
     console.log('', event.detail);
-    if (event.detail.value === 'all') {
-      this.relevantPlaces = this.loadedPlaces;
-      this.listedLoadedPlaces = this.relevantPlaces.slice(1);
-    } else {
-      this.relevantPlaces = this.loadedPlaces.filter(place => place.userId !== this.authService.UserId);
-      this.listedLoadedPlaces = this.relevantPlaces.slice(1);
-    }
+    this.authService.UserId
+      .pipe(
+        take(1)
+      )
+      .subscribe(userId => {
+        if (event.detail.value === 'all') {
+          this.relevantPlaces = this.loadedPlaces;
+          this.listedLoadedPlaces = this.relevantPlaces.slice(1);
+        } else {
+          this.relevantPlaces = this.loadedPlaces.filter(place => place.userId !== userId);
+          this.listedLoadedPlaces = this.relevantPlaces.slice(1);
+        }
+      });
   }
 }

@@ -76,21 +76,29 @@ export class BookingService {
         dateTo: Date) {
 
         let generatedId: string;
+        let newBooking: Booking;
 
-        const newBooking = new Booking(
-            Math.random().toString(),
-            placeId,
-            this.authService.UserId,
-            placeTitle,
-            placeImage,
-            firstName,
-            lastName,
-            guestNumber,
-            dateFrom,
-            dateTo);
-
-        return this.http.post<{ name: string }>(`${environment.firebaseBookedPlacesUrl}.json`, { ...newBooking, id: null })
+        return this.authService.UserId
             .pipe(
+                take(1),
+                switchMap(userId => {
+                    if (!userId) {
+                        throw new Error('No user id found');
+                    }
+
+                    newBooking = new Booking(
+                        Math.random().toString(),
+                        placeId,
+                        userId,
+                        placeTitle,
+                        placeImage,
+                        firstName,
+                        lastName,
+                        guestNumber,
+                        dateFrom,
+                        dateTo);
+                    return this.http.post<{ name: string }>(`${environment.firebaseBookedPlacesUrl}.json`, { ...newBooking, id: null });
+                }),
                 switchMap(resData => {
                     generatedId = resData.name;
                     return this.bookings;
