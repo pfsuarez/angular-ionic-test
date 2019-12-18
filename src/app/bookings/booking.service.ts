@@ -35,9 +35,17 @@ export class BookingService {
     ) { }
 
     fetchBookings() {
-        return this.http.get<{ [key: string]: BookingData }>
-            (`${environment.firebaseBookedPlacesUrl}.json?orderBy="userId"&equalTo="${this.authService.UserId}"`)
+        return this.authService.UserId
             .pipe(
+                take(1),
+                switchMap(userId => {
+                    if (!userId) {
+                        throw new Error('User not found');
+                    }
+
+                    return this.http.get<{ [key: string]: BookingData }>
+                        (`${environment.firebaseBookedPlacesUrl}.json?orderBy="userId"&equalTo="${userId}"`);
+                }),
                 map(resData => {
                     const bookings: Booking[] = [];
                     for (const key in resData) {
