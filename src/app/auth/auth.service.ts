@@ -3,6 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 
+import { Plugins } from '@capacitor/core';
+
 import { environment } from 'src/environments/environment';
 import { User } from './user.model';
 
@@ -90,5 +92,18 @@ export class AuthService {
       userData.idToken,
       expirationTime
     ));
+    this.storeAuthData(userData.localId, userData.idToken, expirationTime.toISOString());
+  }
+
+  private storeAuthData(userId: string, token: string, tokenExpirationDate: string) {
+    const data = {
+      userId,
+      token,
+      tokenExpirationDate
+    };
+    Plugins.Storage.set({
+      key: 'authData',
+      value: JSON.stringify(data)
+    });
   }
 }
