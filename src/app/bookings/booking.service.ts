@@ -35,16 +35,23 @@ export class BookingService {
     ) { }
 
     fetchBookings() {
+        let fetchedUserId: string;
+
         return this.authService.UserId
             .pipe(
                 take(1),
                 switchMap(userId => {
-                    if (!userId) {
+                    fetchedUserId = userId;
+                    return this.authService.token;
+                }),
+                take(1),
+                switchMap(token => {
+                    if (!fetchedUserId) {
                         throw new Error('User not found');
                     }
 
                     return this.http.get<{ [key: string]: BookingData }>
-                        (`${environment.firebaseBookedPlacesUrl}.json?orderBy="userId"&equalTo="${userId}"`);
+                        (`${environment.firebaseBookedPlacesUrl}.json?auth=${token}&orderBy="userId"&equalTo="${fetchedUserId}"`);
                 }),
                 map(resData => {
                     const bookings: Booking[] = [];
@@ -85,19 +92,25 @@ export class BookingService {
 
         let generatedId: string;
         let newBooking: Booking;
+        let fetchedUserId: string;
 
         return this.authService.UserId
             .pipe(
                 take(1),
                 switchMap(userId => {
-                    if (!userId) {
+                    fetchedUserId = userId;
+                    return this.authService.token;
+                }),
+                take(1),
+                switchMap(token => {
+                    if (!fetchedUserId) {
                         throw new Error('No user id found');
                     }
 
                     newBooking = new Booking(
                         Math.random().toString(),
                         placeId,
-                        userId,
+                        fetchedUserId,
                         placeTitle,
                         placeImage,
                         firstName,
@@ -105,7 +118,14 @@ export class BookingService {
                         guestNumber,
                         dateFrom,
                         dateTo);
-                    return this.http.post<{ name: string }>(`${environment.firebaseBookedPlacesUrl}.json`, { ...newBooking, id: null });
+                    return this.http.post<{ name: string }>
+                        (`${environment.firebaseBookedPlacesUrl}.json`,
+                            { ...newBooking, id: null },
+                            {
+                                headers: {
+                                    Authorization: 'Bearer ' + token
+                                }
+                            });
                 }),
                 switchMap(resData => {
                     generatedId = resData.name;
@@ -120,15 +140,18 @@ export class BookingService {
     }
 
     cancelBooking(id: string) {
-        return this.http.delete(`${environment.firebaseBookedPlacesUrl}/${id}.json`)
-            .pipe(
-                switchMap(() => {
-                    return this.bookings;
-                }),
-                take(1),
-                tap(bookings => {
-                    this.pBookings.next(bookings.filter(b => b.id !== id));
-                })
-            );
+        return this.authService.token.pipe(
+            take(1),
+            switchMap(token => {
+                return this.http.delete(`${environment.firebaseBookedPlacesUrl}/${id}.json?auth=${token}`);
+            }),
+            switchMap(() => {
+                return this.bookings;
+            }),
+            take(1),
+            tap(bookings => {
+                this.pBookings.next(bookings.filter(b => b.id !== id));
+            })
+        );
     }
 }

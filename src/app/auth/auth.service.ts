@@ -50,6 +50,18 @@ export class AuthService implements OnDestroy {
       );
   }
 
+  get token() {
+    return this.user.asObservable()
+      .pipe(
+        map(user => {
+          if (user) {
+            return user.token;
+          }
+          return null;
+        })
+      );
+  }
+
   constructor(
     private http: HttpClient
   ) { }
